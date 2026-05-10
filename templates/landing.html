@@ -24,7 +24,7 @@
         </p>
         <div class="hero-actions">
             <a href="{{ url_for('register') }}" class="btn-primary">Create free account</a>
-            <a href="#" class="btn-primary">See how it works</a>
+            <button class="btn-primary" id="open-video-modal">See how it works</button>
         </div>
     </div>
     <div class="hero-visual">
@@ -97,4 +97,51 @@
     </div>
 </section>
 
+<!-- Video Modal -->
+<div id="video-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;">
+    <div style="position:relative;width:min(860px,90vw);background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;">
+        <button id="close-video-modal" style="position:absolute;top:0.6rem;right:0.75rem;z-index:10;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;line-height:1;">&#x2715;</button>
+        <iframe id="video-iframe"
+            src=""
+            width="100%" height="100%"
+            style="display:block;border:none;"
+            allow="autoplay; encrypted-media"
+            allowfullscreen>
+        </iframe>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    var VIDEO_URL = 'https://www.youtube.com/embed/dQw4w9WgXcQ?enablejsapi=1';
+    var modal  = document.getElementById('video-modal');
+    var iframe = document.getElementById('video-iframe');
+
+    function openModal() {
+        iframe.src = VIDEO_URL;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        iframe.src = '';
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    document.getElementById('open-video-modal').addEventListener('click', openModal);
+    document.getElementById('close-video-modal').addEventListener('click', closeModal);
+
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeModal();
+    });
+})();
+</script>
 {% endblock %}
