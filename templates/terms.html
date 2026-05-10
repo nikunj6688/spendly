@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Terms and Conditions — Spendly{% endblock %}
+
+{% block head %}
+<style>
+    .terms-section {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 4rem 2rem 6rem;
+    }
+
+    .terms-badge {
+        display: inline-block;
+        background: var(--accent-light);
+        color: var(--accent);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 0.3rem 0.75rem;
+        border-radius: 999px;
+        margin-bottom: 1.25rem;
+    }
+
+    .terms-title {
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 4vw, 3rem);
+        color: var(--ink);
+        line-height: 1.15;
+        margin-bottom: 0.5rem;
+    }
+
+    .terms-meta {
+        font-size: 0.85rem;
+        color: var(--ink-muted);
+        margin-bottom: 3rem;
+    }
+
+    .terms-body h2 {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        color: var(--ink);
+        margin-top: 2.5rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .terms-body p {
+        font-size: 1rem;
+        color: var(--ink-soft);
+        line-height: 1.75;
+        margin-bottom: 1rem;
+    }
+
+    .terms-divider {
+        border: none;
+        border-top: 1px solid var(--border-soft, #e5e2dc);
+        margin: 2rem 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="terms-section">
+    <div class="terms-badge">Legal</div>
+    <h1 class="terms-title">Terms and Conditions</h1>
+    <p class="terms-meta">Last updated: May 2026</p>
+
+    <div class="terms-body">
+
+        <h2>1. Acceptance of Terms</h2>
+        <p>
+            By accessing or using Spendly ("the Service"), you agree to be bound by these Terms and
+            Conditions. If you do not agree to these terms, please do not use the Service.
+            Your continued use of Spendly constitutes your acceptance of any updates to these terms.
+        </p>
+
+        <hr class="terms-divider">
+
+        <h2>2. Use of Service</h2>
+        <p>
+            Spendly is a personal expense tracking tool intended for individual, non-commercial use.
+            You agree to use the Service only for lawful purposes and in a way that does not infringe
+            the rights of others or restrict their use of the Service.
+        </p>
+        <p>
+            You are responsible for maintaining the confidentiality of your account credentials and
+            for all activity that occurs under your account. You must notify us immediately of any
+            unauthorised use of your account.
+        </p>
+
+        <hr class="terms-divider">
+
+        <h2>3. User Data</h2>
+        <p>
+            All expense data you enter into Spendly is stored solely for the purpose of providing
+            you with the Service. We do not sell, share, or disclose your personal financial data
+            to third parties without your explicit consent, except where required by law.
+        </p>
+        <p>
+            You retain full ownership of the data you submit. You may request deletion of your
+            account and associated data at any time by contacting us.
+        </p>
+
+        <hr class="terms-divider">
+
+        <h2>4. Limitations of Liability</h2>
+        <p>
+            Spendly is provided on an "as is" and "as available" basis without warranties of any kind,
+            either express or implied. We do not guarantee that the Service will be uninterrupted,
+            error-free, or completely secure.
+        </p>
+        <p>
+            To the fullest extent permitted by law, Spendly and its creators shall not be liable for
+            any indirect, incidental, special, or consequential damages arising from your use of or
+            inability to use the Service, including any loss of data or financial decisions made
+            based on information displayed within the app.
+        </p>
+
+        <hr class="terms-divider">
+
+        <h2>5. Changes to Terms</h2>
+        <p>
+            We reserve the right to modify these Terms and Conditions at any time. When we do, we
+            will update the "Last updated" date at the top of this page. We encourage you to review
+            this page periodically. Continued use of the Service after changes are posted constitutes
+            your acceptance of the revised terms.
+        </p>
+
+        <hr class="terms-divider">
+
+        <h2>6. Contact</h2>
+        <p>
+            If you have any questions about these Terms and Conditions, please reach out to us
+            through the contact information provided on our website.
+        </p>
+
+    </div>
+</section>
+{% endblock %}
