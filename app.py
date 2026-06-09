@@ -17,6 +17,9 @@ def landing():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if session.get("user_id"):
+        return redirect(url_for("landing"))
+
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         email = request.form.get("email", "").strip()
@@ -43,16 +46,19 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if session.get("user_id"):
+        return redirect(url_for("landing"))
+
     if request.method == "POST":
         email = request.form.get("email", "").strip()
-        password = request.form.get("password", "").strip()
+        password = request.form.get("password", "")
 
         db = get_db()
         user = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
         db.close()
 
         if not user or not check_password_hash(user["password_hash"], password):
-            return render_template("login.html", error="Invalid email or password.")
+            return render_template("login.html", error="Invalid email or password.", email=email)
 
         session["user_id"] = user["id"]
         session["user_name"] = user["name"]
