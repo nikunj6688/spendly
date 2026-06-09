@@ -17,26 +17,39 @@ def landing():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if session.get("user_id"):
+        return redirect(url_for("landing"))
+
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         email = request.form.get("email", "").strip()
-        password = request.form.get("password", "").strip()
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
 
-        if not name or not email or not password:
-            return render_template("register.html", error="All fields are required.")
+        if not name or not email or not password or not confirm_password:
+            return render_template("register.html", error="All fields are required.", name=name, email=email)
+
+        if len(password) < 8:
+            return render_template("register.html", error="Password must be at least 8 characters.", name=name, email=email)
+
+        if password != confirm_password:
+            return render_template("register.html", error="Passwords do not match.", name=name, email=email)
 
         db = get_db()
         if db.execute("SELECT 1 FROM users WHERE email = ?", (email,)).fetchone():
             db.close()
-            return render_template("register.html", error="Email already registered.")
+            return render_template("register.html", error="Email already registered.", name=name, email=email)
 
-        db.execute(
+        cursor = db.cursor()
+        cursor.execute(
             "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
             (name, email, generate_password_hash(password))
         )
         db.commit()
+        session["user_id"] = cursor.lastrowid
+        session["user_name"] = name
         db.close()
-        return redirect(url_for("login"))
+        return redirect(url_for("landing"))
 
     return render_template("register.html")
 
