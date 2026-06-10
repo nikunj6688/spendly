@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile — Spendly{% endblock %}
+
+{% block content %}
+
+<section class="profile-section">
+    <div class="profile-container">
+
+        <div class="profile-header">
+            <h1 class="profile-page-title">My Profile</h1>
+        </div>
+
+        <div class="profile-card">
+            <div class="profile-avatar">{{ user.name[0].upper() }}</div>
+            <h2 class="profile-name">{{ user.name }}</h2>
+
+            <div class="profile-info">
+                <div class="profile-info-row">
+                    <span class="profile-label">Email</span>
+                    <span class="profile-value">{{ user.email }}</span>
+                </div>
+                <div class="profile-info-row">
+                    <span class="profile-label">Member since</span>
+                    <span class="profile-value">{{ member_since }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-actions">
+            <a href="{{ url_for('logout') }}" class="btn-primary">Sign out</a>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}
