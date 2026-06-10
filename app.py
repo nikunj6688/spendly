@@ -62,7 +62,7 @@ def login():
 
         session["user_id"] = user["id"]
         session["user_name"] = user["name"]
-        return redirect(url_for("landing"))
+        return redirect(url_for("profile"))
 
     return render_template("login.html")
 
@@ -89,7 +89,21 @@ def logout():
 
 @app.route("/profile")
 def profile():
-    return "Profile page — coming in Step 4"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    from datetime import datetime
+    db = get_db()
+    user = db.execute(
+        "SELECT id, name, email, created_at FROM users WHERE id = ?",
+        (session["user_id"],)
+    ).fetchone()
+    db.close()
+
+    dt = datetime.fromisoformat(user["created_at"])
+    member_since = dt.strftime("%B ") + str(dt.day) + dt.strftime(", %Y")
+
+    return render_template("profile.html", user=user, member_since=member_since)
 
 
 @app.route("/expenses/add")
