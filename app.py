@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.db import get_db, init_db, seed_db
 
 app = Flask(__name__)
 app.secret_key = 'spendly-secret-key'
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 
 # ------------------------------------------------------------------ #
@@ -87,12 +88,43 @@ def logout():
     return redirect(url_for("landing"))
 
 
-@app.route("/profile")
+@app.route("/profile", methods=["GET", "POST"])
 def profile():
     if not session.get("user_id"):
         return redirect(url_for("login"))
 
     from datetime import datetime
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
+
+        if not name or not email:
+            flash("Name and email are required.", "error")
+            return redirect(url_for("profile"))
+
+        db = get_db()
+        duplicate = db.execute(
+            "SELECT 1 FROM users WHERE email = ? AND id != ?",
+            (email, session["user_id"])
+        ).fetchone()
+
+        if duplicate:
+            db.close()
+            flash("That email is already used by another account.", "error")
+            return redirect(url_for("profile"))
+
+        db.execute(
+            "UPDATE users SET name = ?, email = ? WHERE id = ?",
+            (name, email, session["user_id"])
+        )
+        db.commit()
+        db.close()
+
+        session["user_name"] = name
+        flash("Profile updated successfully.", "success")
+        return redirect(url_for("profile"))
+
     db = get_db()
     user = db.execute(
         "SELECT id, name, email, created_at FROM users WHERE id = ?",
@@ -104,6 +136,45 @@ def profile():
     member_since = dt.strftime("%B ") + str(dt.day) + dt.strftime(", %Y")
 
     return render_template("profile.html", user=user, member_since=member_since)
+
+
+@app.route("/profile/change-password", methods=["POST"])
+def change_password():
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    current = request.form.get("current_password", "")
+    new_pw = request.form.get("new_password", "")
+    confirm = request.form.get("confirm_password", "")
+
+    if not current or not new_pw or not confirm:
+        flash("All password fields are required.", "error")
+        return redirect(url_for("profile"))
+
+    if new_pw != confirm:
+        flash("New password and confirmation do not match.", "error")
+        return redirect(url_for("profile"))
+
+    db = get_db()
+    user = db.execute(
+        "SELECT password_hash FROM users WHERE id = ?",
+        (session["user_id"],)
+    ).fetchone()
+
+    if not check_password_hash(user["password_hash"], current):
+        db.close()
+        flash("Current password is incorrect.", "error")
+        return redirect(url_for("profile"))
+
+    db.execute(
+        "UPDATE users SET password_hash = ? WHERE id = ?",
+        (generate_password_hash(new_pw), session["user_id"])
+    )
+    db.commit()
+    db.close()
+
+    flash("Password changed successfully.", "success")
+    return redirect(url_for("profile"))
 
 
 @app.route("/expenses/add")
