@@ -33,6 +33,87 @@
             </div>
         </div>
 
+        <div class="expenses-card">
+            <h3 class="profile-form-title">My Expenses</h3>
+
+            <form class="filter-form" method="get" action="{{ url_for('profile') }}">
+                <div class="quick-filters">
+                    <button type="button" class="btn-quick" onclick="setQuickFilter(7)">Last Week</button>
+                    <button type="button" class="btn-quick" onclick="setQuickFilter(30)">Last Month</button>
+                    <button type="button" class="btn-quick" onclick="setQuickFilter(90)">Last 90 Days</button>
+                </div>
+                <div class="filter-fields">
+                    <div class="form-group">
+                        <label for="from">From</label>
+                        <input type="date" id="from" name="from" class="form-input"
+                               value="{{ date_from }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="to">To</label>
+                        <input type="date" id="to" name="to" class="form-input"
+                               value="{{ date_to }}">
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn-filter">Filter</button>
+                    <a href="{{ url_for('profile') }}" class="btn-ghost btn-clear">Clear</a>
+                </div>
+            </form>
+
+            <script>
+                function setQuickFilter(days) {
+                    var today = new Date();
+                    var from = new Date(today);
+                    from.setDate(today.getDate() - days);
+                    document.getElementById('from').value = from.toISOString().slice(0, 10);
+                    document.getElementById('to').value = today.toISOString().slice(0, 10);
+                    document.querySelector('.filter-form').submit();
+                }
+            </script>
+
+            <div class="summary-strip">
+                <div class="summary-stat">
+                    <span class="summary-value">${{ "%.2f" % total }}</span>
+                    <span class="summary-label">Total Spent</span>
+                </div>
+                <div class="summary-stat">
+                    <span class="summary-value">{{ count }}</span>
+                    <span class="summary-label">Transactions</span>
+                </div>
+                <div class="summary-stat">
+                    <span class="summary-value">{{ top_category }}</span>
+                    <span class="summary-label">Top Category</span>
+                </div>
+            </div>
+
+            <div class="table-scroll">
+                <table class="expenses-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th class="col-amount">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if expenses %}
+                            {% for e in expenses %}
+                            <tr>
+                                <td>{{ e.date }}</td>
+                                <td><span class="category-badge">{{ e.category }}</span></td>
+                                <td>{{ e.description or '—' }}</td>
+                                <td class="col-amount">${{ "%.2f" % e.amount }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr><td colspan="4" class="empty-row">No expenses found.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="profile-form-card">
             <h3 class="profile-form-title">Edit Profile</h3>
             <form method="POST" action="{{ url_for('profile') }}">
@@ -47,28 +128,6 @@
                            value="{{ user.email }}" required>
                 </div>
                 <button type="submit" class="btn-submit">Save Changes</button>
-            </form>
-        </div>
-
-        <div class="profile-form-card">
-            <h3 class="profile-form-title">Change Password</h3>
-            <form method="POST" action="{{ url_for('change_password') }}">
-                <div class="form-group">
-                    <label for="current_password">Current Password</label>
-                    <input type="password" id="current_password" name="current_password"
-                           class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label for="new_password">New Password</label>
-                    <input type="password" id="new_password" name="new_password"
-                           class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label for="confirm_password">Confirm New Password</label>
-                    <input type="password" id="confirm_password" name="confirm_password"
-                           class="form-input" required>
-                </div>
-                <button type="submit" class="btn-submit">Change Password</button>
             </form>
         </div>
 

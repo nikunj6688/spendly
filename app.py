@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.db import get_db, init_db, seed_db
@@ -93,8 +94,6 @@ def profile():
     if not session.get("user_id"):
         return redirect(url_for("login"))
 
-    from datetime import datetime
-
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         email = request.form.get("email", "").strip()
@@ -125,17 +124,79 @@ def profile():
         flash("Profile updated successfully.", "success")
         return redirect(url_for("profile"))
 
+    # Parse & validate date filter query params
+    date_from = request.args.get('from', '').strip()
+    date_to   = request.args.get('to', '').strip()
+
+    valid_from = valid_to = None
+    try:
+        if date_from:
+            datetime.strptime(date_from, '%Y-%m-%d')
+            valid_from = date_from
+    except ValueError:
+        flash('Invalid "from" date — showing all expenses.', 'error')
+
+    try:
+        if date_to:
+            datetime.strptime(date_to, '%Y-%m-%d')
+            valid_to = date_to
+    except ValueError:
+        flash('Invalid "to" date — showing all expenses.', 'error')
+
+    # If either date is invalid, discard both to show all expenses
+    if date_from and valid_from is None:
+        valid_to = None
+    if date_to and valid_to is None:
+        valid_from = None
+
+    # Swap silently if from > to
+    if valid_from and valid_to and valid_from > valid_to:
+        valid_from, valid_to = valid_to, valid_from
+
     db = get_db()
     user = db.execute(
         "SELECT id, name, email, created_at FROM users WHERE id = ?",
         (session["user_id"],)
     ).fetchone()
+
+    query = (
+        "SELECT date, category, description, amount FROM expenses "
+        "WHERE user_id = ?"
+    )
+    params = [session["user_id"]]
+    if valid_from:
+        query += " AND date >= ?"
+        params.append(valid_from)
+    if valid_to:
+        query += " AND date <= ?"
+        params.append(valid_to)
+    query += " ORDER BY date DESC"
+    rows = db.execute(query, params).fetchall()
     db.close()
+
+    # Compute summary stats in Python
+    expenses = [dict(r) for r in rows]
+    total = sum(e['amount'] for e in expenses)
+    count = len(expenses)
+    cat_totals = {}
+    for e in expenses:
+        cat_totals[e['category']] = cat_totals.get(e['category'], 0) + e['amount']
+    top_category = max(cat_totals, key=cat_totals.get) if cat_totals else '—'
 
     dt = datetime.fromisoformat(user["created_at"])
     member_since = dt.strftime("%B ") + str(dt.day) + dt.strftime(", %Y")
 
-    return render_template("profile.html", user=user, member_since=member_since)
+    return render_template(
+        "profile.html",
+        user=user,
+        member_since=member_since,
+        expenses=expenses,
+        date_from=valid_from or '',
+        date_to=valid_to or '',
+        total=total,
+        count=count,
+        top_category=top_category,
+    )
 
 
 @app.route("/profile/change-password", methods=["POST"])
