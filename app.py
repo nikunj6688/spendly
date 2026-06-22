@@ -1,3 +1,4 @@
+import math
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,6 +8,7 @@ app = Flask(__name__)
 app.secret_key = 'spendly-secret-key'
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
+EXPENSE_CATEGORIES = ["Food", "Transport", "Bills", "Health", "Entertainment", "Shopping", "Other"]
 
 # ------------------------------------------------------------------ #
 # Routes                                                              #
@@ -245,9 +247,71 @@ def analytics():
     return render_template("analytics.html")
 
 
-@app.route("/expenses/add")
+
+@app.route("/expenses/add", methods=["GET", "POST"])
 def add_expense():
-    return "Add expense — coming in Step 7"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        amount_raw  = request.form.get("amount", "").strip()
+        category    = request.form.get("category", "").strip()
+        date_raw    = request.form.get("date", "").strip()
+        description = request.form.get("description", "").strip()
+
+        error  = None
+        amount = None
+
+        if not amount_raw:
+            error = "Amount is required."
+        else:
+            try:
+                amount = float(amount_raw)
+                if amount <= 0 or not math.isfinite(amount):
+                    error = "Amount must be a positive number."
+            except ValueError:
+                error = "Amount must be a number (e.g. 12.50)."
+
+        if not error and category not in EXPENSE_CATEGORIES:
+            error = "Please select a valid category."
+
+        if not error:
+            try:
+                datetime.strptime(date_raw, "%Y-%m-%d")
+            except ValueError:
+                error = "Date must be a valid YYYY-MM-DD value."
+
+        if not error and len(description) > 200:
+            error = "Description must be 200 characters or fewer."
+
+        if error:
+            return render_template(
+                "add_expense.html",
+                error=error,
+                categories=EXPENSE_CATEGORIES,
+                form={"amount": amount_raw, "category": category,
+                      "date": date_raw, "description": description},
+            )
+
+        db = get_db()
+        try:
+            db.execute(
+                "INSERT INTO expenses (user_id, amount, category, date, description) VALUES (?, ?, ?, ?, ?)",
+                (session["user_id"], amount, category, date_raw, description),
+            )
+            db.commit()
+        finally:
+            db.close()
+
+        flash("Expense added.", "success")
+        return redirect(url_for("profile"))
+
+    today = datetime.today().strftime("%Y-%m-%d")
+    return render_template(
+        "add_expense.html",
+        categories=EXPENSE_CATEGORIES,
+        form={"amount": "", "category": "", "date": today, "description": ""},
+    )
 
 
 @app.route("/expenses/<int:id>/edit")
