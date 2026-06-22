@@ -102,6 +102,7 @@ a { color: inherit; text-decoration: none; }
 
 .nav-links a { color: var(--ink-muted); transition: color 0.2s; }
 .nav-links a:hover { color: var(--ink); }
+.nav-links a.nav-active { color: var(--ink); font-weight: 600; }
 .nav-user { color: var(--ink-muted); font-size: 0.9rem; }
 
 .nav-cta {
@@ -792,4 +793,103 @@ a { color: inherit; text-decoration: none; }
     color: var(--ink-muted);
     padding: 2rem;
     font-style: italic;
+}
+
+/* ------------------------------------------------------------------ */
+/* Analytics — Coming Soon page                                        */
+/* ------------------------------------------------------------------ */
+
+.analytics-section {
+    min-height: calc(100vh - 60px - 100px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 2rem;
+}
+
+.analytics-container {
+    width: 100%;
+    max-width: 760px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.analytics-badge {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+}
+
+.analytics-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+}
+
+.analytics-title em {
+    font-style: italic;
+    color: var(--accent);
+}
+
+.analytics-subtitle {
+    font-size: 1.05rem;
+    color: var(--ink-muted);
+    line-height: 1.7;
+    max-width: 520px;
+}
+
+.analytics-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.analytics-preview-card {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.75rem 1.5rem;
+    text-align: left;
+}
+
+.analytics-preview-icon {
+    font-size: 1.4rem;
+    color: var(--accent);
+    margin-bottom: 0.875rem;
+}
+
+.analytics-preview-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--ink);
+    margin-bottom: 0.6rem;
+}
+
+.analytics-preview-body {
+    font-size: 0.875rem;
+    color: var(--ink-muted);
+    line-height: 1.65;
+}
+
+.analytics-cta {
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 700px) {
+    .analytics-preview-grid {
+        grid-template-columns: 1fr;
+    }
 }
