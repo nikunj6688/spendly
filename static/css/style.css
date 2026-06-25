@@ -817,6 +817,35 @@ a { color: inherit; text-decoration: none; }
     color: var(--paper);
 }
 
+.btn-delete {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--danger);
+    border: 1px solid var(--danger-light);
+    background: var(--danger-light);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-sm);
+    transition: background 0.18s, color 0.18s;
+}
+
+.btn-delete:hover {
+    background: var(--danger);
+    color: var(--paper);
+}
+
+.delete-expense-container {
+    max-width: 520px;
+}
+
+.btn-submit--danger {
+    background: var(--danger);
+}
+
+.btn-submit--danger:hover {
+    background: var(--ink);
+}
+
 /* ------------------------------------------------------------------ */
 /* Analytics — Coming Soon page                                        */
 /* ------------------------------------------------------------------ */
