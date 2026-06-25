@@ -795,6 +795,28 @@ a { color: inherit; text-decoration: none; }
     font-style: italic;
 }
 
+.col-actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.btn-edit {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--accent);
+    border: 1px solid var(--accent-light);
+    background: var(--accent-light);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-sm);
+    transition: background 0.18s, color 0.18s;
+}
+
+.btn-edit:hover {
+    background: var(--accent);
+    color: var(--paper);
+}
+
 /* ------------------------------------------------------------------ */
 /* Analytics — Coming Soon page                                        */
 /* ------------------------------------------------------------------ */

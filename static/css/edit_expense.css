@@ -1,0 +1,9 @@
+.edit-expense-container {
+    max-width: 520px;
+}
+
+.field-optional {
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    font-weight: 400;
+}
