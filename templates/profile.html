@@ -94,6 +94,7 @@
                             <th>Category</th>
                             <th>Description</th>
                             <th class="col-amount">Amount</th>
+                            <th class="col-actions">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -104,10 +105,13 @@
                                 <td><span class="category-badge">{{ e.category }}</span></td>
                                 <td>{{ e.description or '—' }}</td>
                                 <td class="col-amount">${{ "%.2f" % e.amount }}</td>
+                                <td class="col-actions">
+                                    <a href="{{ url_for('edit_expense', id=e.id) }}" class="btn-edit">Edit</a>
+                                </td>
                             </tr>
                             {% endfor %}
                         {% else %}
-                            <tr><td colspan="4" class="empty-row">No expenses found.</td></tr>
+                            <tr><td colspan="5" class="empty-row">No expenses found.</td></tr>
                         {% endif %}
                     </tbody>
                 </table>

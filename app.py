@@ -1,6 +1,6 @@
 import math
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.db import get_db, init_db, seed_db
 
@@ -162,7 +162,7 @@ def profile():
     ).fetchone()
 
     query = (
-        "SELECT date, category, description, amount FROM expenses "
+        "SELECT id, date, category, description, amount FROM expenses "
         "WHERE user_id = ?"
     )
     params = [session["user_id"]]
@@ -314,9 +314,90 @@ def add_expense():
     )
 
 
-@app.route("/expenses/<int:id>/edit")
+@app.route("/expenses/<int:id>/edit", methods=["GET", "POST"])
 def edit_expense(id):
-    return "Edit expense — coming in Step 8"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    db = get_db()
+    expense = db.execute(
+        "SELECT id, user_id, amount, category, date, description "
+        "FROM expenses WHERE id = ?",
+        (id,)
+    ).fetchone()
+    db.close()
+
+    if expense is None or expense["user_id"] != session["user_id"]:
+        abort(404)
+
+    if request.method == "POST":
+        amount_raw  = request.form.get("amount", "").strip()
+        category    = request.form.get("category", "").strip()
+        date_raw    = request.form.get("date", "").strip()
+        description = request.form.get("description", "").strip()
+
+        error  = None
+        amount = None
+
+        if not amount_raw:
+            error = "Amount is required."
+        else:
+            try:
+                amount = float(amount_raw)
+                if amount <= 0 or not math.isfinite(amount):
+                    error = "Amount must be a positive number."
+            except ValueError:
+                error = "Amount must be a number (e.g. 12.50)."
+
+        if not error and category not in EXPENSE_CATEGORIES:
+            error = "Please select a valid category."
+
+        if not error:
+            try:
+                datetime.strptime(date_raw, "%Y-%m-%d")
+            except ValueError:
+                error = "Date must be a valid YYYY-MM-DD value."
+
+        if not error and len(description) > 200:
+            error = "Description must be 200 characters or fewer."
+
+        if error:
+            return render_template(
+                "edit_expense.html",
+                error=error,
+                categories=EXPENSE_CATEGORIES,
+                form={"amount": amount_raw, "category": category,
+                      "date": date_raw, "description": description},
+                expense_id=id,
+            )
+
+        db = get_db()
+        try:
+            db.execute(
+                "UPDATE expenses "
+                "SET amount = ?, category = ?, date = ?, description = ? "
+                "WHERE id = ? AND user_id = ?",
+                (amount, category, date_raw, description,
+                 id, session["user_id"]),
+            )
+            db.commit()
+        finally:
+            db.close()
+
+        flash("Expense updated.", "success")
+        return redirect(url_for("profile"))
+
+    return render_template(
+        "edit_expense.html",
+        categories=EXPENSE_CATEGORIES,
+        form={
+            "amount": expense["amount"],
+            "category": expense["category"],
+            "date": expense["date"],
+            "description": expense["description"] or "",
+        },
+        expense_id=id,
+    )
 
 
 @app.route("/expenses/<int:id>/delete")
