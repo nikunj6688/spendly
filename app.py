@@ -400,9 +400,36 @@ def edit_expense(id):
     )
 
 
-@app.route("/expenses/<int:id>/delete")
+@app.route("/expenses/<int:id>/delete", methods=["GET", "POST"])
 def delete_expense(id):
-    return "Delete expense — coming in Step 9"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    db = get_db()
+    expense = db.execute(
+        "SELECT id, user_id, amount, category, date, description "
+        "FROM expenses WHERE id = ?",
+        (id,)
+    ).fetchone()
+    db.close()
+
+    if expense is None or expense["user_id"] != session["user_id"]:
+        abort(404)
+
+    if request.method == "POST":
+        db = get_db()
+        try:
+            db.execute(
+                "DELETE FROM expenses WHERE id = ? AND user_id = ?",
+                (id, session["user_id"]),
+            )
+            db.commit()
+        finally:
+            db.close()
+        flash("Expense deleted.", "success")
+        return redirect(url_for("profile"))
+
+    return render_template("delete_expense.html", expense=expense)
 
 
 with app.app_context():
